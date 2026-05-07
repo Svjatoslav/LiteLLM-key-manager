@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Accept Invite · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="auth-panel">
+    <h1>Join {{ invite.team.name }}</h1>
+    <p class="muted">This invite is for {{ invite.email }}. Set a local password for the first version.</p>
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+    <form method="post" action="/invites/{{ token }}" class="stack">
+      <label>Password <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+      <label>Confirm password <input type="password" name="password_confirm" required minlength="8" autocomplete="new-password"></label>
+      <button type="submit">Accept invite</button>
+    </form>
+  </section>
+{% endblock %}
+

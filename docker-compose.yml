@@ -1,0 +1,71 @@
+services:
+  litellm-keys-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: litellm_keys
+      POSTGRES_USER: litellm_keys
+      POSTGRES_PASSWORD: litellm_keys
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/litellm-keys-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm_keys -d litellm_keys"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  litellm-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: litellm
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/litellm-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  litellm:
+    image: ghcr.io/berriai/litellm-database:v1.83.10-stable
+    depends_on:
+      litellm-db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://litellm:litellm@litellm-db:5432/litellm
+      STORE_MODEL_IN_DB: "True"
+    volumes:
+      - ./litellm.config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')\" >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  litellm-keys:
+    build: .
+    depends_on:
+      litellm-keys-db:
+        condition: service_healthy
+      litellm:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://litellm_keys:litellm_keys@litellm-keys-db:5432/litellm_keys
+      LITELLM_BASE_URL: http://litellm:4000

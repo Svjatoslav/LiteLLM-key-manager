@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Lead API Key Created · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="panel narrow success">
+    <p class="eyebrow">Show once</p>
+    <h1>{{ team.name }} lead api-key</h1>
+    <p class="muted">
+      {% if regenerated %}Send this regenerated key to {{ lead_key.lead_email }}. The previous key was deleted or blocked in LiteLLM.{% else %}Send this key to {{ lead_key.lead_email }}.{% endif %}
+      It is stored encrypted and cannot be shown again.
+    </p>
+    <pre class="secret">{{ api_key }}</pre>
+    <a class="button-secondary" href="/admin">Back to admin</a>
+  </section>
+{% endblock %}

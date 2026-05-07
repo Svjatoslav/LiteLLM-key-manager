@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Teams · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Teams</p>
+      <h1>Select a team</h1>
+    </div>
+  </section>
+  <section class="panel">
+    {% if teams %}
+      <div class="team-grid">
+        {% for team in teams %}
+          <a class="team-tile" href="/teams/{{ team.id }}">
+            <strong>{{ team.name }}</strong>
+            <span>{{ team.slug }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">You are not assigned as a lead for any team yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}
+

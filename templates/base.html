@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}LiteLLM Keys{% endblock %}</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <link rel="stylesheet" href="/static/css/app.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">LiteLLM Keys</a>
+      {% if current_user %}
+        <nav>
+          {% if current_user.is_admin %}
+            <a href="/admin">Admin</a>
+          {% endif %}
+          <a href="/teams">Teams</a>
+          <form method="post" action="/logout">
+            <button type="submit" class="link-button">Logout</button>
+          </form>
+        </nav>
+      {% endif %}
+    </header>
+    <main class="shell">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

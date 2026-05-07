@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">{{ team.slug }}</p>
+      <h1>{{ team.name }}</h1>
+      <p class="muted">{{ ", ".join(team.models) }} · budget {{ team.max_budget or "none" }} · rpm {{ team.rpm_limit or "none" }} · tpm {{ team.tpm_limit or "none" }}</p>
+    </div>
+  </section>
+
+  {% if new_key %}
+    <section class="panel success">
+      <p class="eyebrow">Show once</p>
+      <h2>New key for {{ new_key_owner }}</h2>
+      <p class="muted">This full key will not be shown again. The service stores it encrypted only for LiteLLM management actions.</p>
+      <pre class="secret">{{ new_key }}</pre>
+    </section>
+  {% endif %}
+
+  <section class="panel">
+    <h2>Create employee key</h2>
+    <form method="post" action="/teams/{{ team.id }}/keys" class="grid-form">
+      <label>Owner email <input type="email" name="owner_email" required placeholder="employee@example.com"></label>
+      <label>Owner name <input name="owner_name" required placeholder="Jane Doe"></label>
+      <label>Purpose <input name="purpose" placeholder="Service, project, experiment"></label>
+      <label>Duration <input name="duration" placeholder="30d, 12h, 2026-12-31"></label>
+      <button type="submit">Create key</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Employee keys</h2>
+    {% if keys %}
+      <div class="table keys">
+        <div class="row head">
+          <span>Owner</span><span>Key</span><span>Status</span><span>Purpose</span><span>Actions</span>
+        </div>
+        {% for key in keys %}
+          <div class="row">
+            <span><strong>{{ key.owner_name }}</strong><small>{{ key.owner_email }}</small></span>
+            <span><code>{{ key.masked_key }}</code><small>{{ key.key_alias }}</small></span>
+            <span><span class="badge {{ key.status.value }}">{{ key.status.value }}</span></span>
+            <span>{{ key.purpose or "none" }}</span>
+            <span class="actions">
+              {% if key.status.value == "active" %}
+                <form method="post" action="/teams/{{ team.id }}/keys/{{ key.id }}/block"><button type="submit">Block</button></form>
+              {% elif key.status.value == "blocked" %}
+                <form method="post" action="/teams/{{ team.id }}/keys/{{ key.id }}/unblock"><button type="submit">Unblock</button></form>
+              {% endif %}
+              {% if key.status.value != "deleted" %}
+                <form method="post" action="/teams/{{ team.id }}/keys/{{ key.id }}/rotate"><button type="submit">Rotate</button></form>
+                <form method="post" action="/teams/{{ team.id }}/keys/{{ key.id }}/delete"><button type="submit" class="danger">Delete</button></form>
+              {% endif %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">No employee keys yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}
+

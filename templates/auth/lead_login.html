@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Team Lead Access · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="auth-panel">
+    <h1>Team lead access</h1>
+    <p class="muted">Paste the LiteLLM team lead api-key issued by the main administrator.</p>
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+    <form method="post" action="/login" class="stack">
+      <label>api-key <input type="password" name="api_key" required autocomplete="off" placeholder="sk-..."></label>
+      <button type="submit">Open team</button>
+    </form>
+    <p class="muted footer-link"><a href="/admin/login">Admin sign in</a></p>
+  </section>
+{% endblock %}
+

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Invite Created · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="panel narrow">
+    <p class="eyebrow">One-time invite</p>
+    <h1>{{ team.name }}</h1>
+    <p class="muted">Send this link to {{ invite.email }}. It is stored only as a hash and cannot be recovered later.</p>
+    <pre class="secret">{{ invite_url }}</pre>
+    <a class="button-secondary" href="/admin">Back to admin</a>
+  </section>
+{% endblock %}
+

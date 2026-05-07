@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">{{ team.slug }}</p>
+      <h1>{{ team.name }}</h1>
+      <p class="muted">Lead {{ lead_key.lead_email }} · LiteLLM user {{ lead_key.litellm_user_id }}</p>
+    </div>
+    <form method="post" action="/logout">
+      <button type="submit" class="button-secondary">Logout</button>
+    </form>
+  </section>
+
+  {% if new_key %}
+    <section class="panel success">
+      <p class="eyebrow">Show once</p>
+      <h2>New key for {{ new_key_owner }}</h2>
+      <p class="muted">This full key will not be shown again.</p>
+      <pre class="secret">{{ new_key }}</pre>
+    </section>
+  {% endif %}
+
+  {% if refresh_message %}
+    <section class="panel success">
+      <p>{{ refresh_message }}</p>
+    </section>
+  {% endif %}
+
+  <section class="panel">
+    <h2>Create key</h2>
+    <form method="post" action="/team/refresh-models" class="inline-form refresh-form">
+      <button type="submit" class="button-secondary">Update models list</button>
+    </form>
+    <form method="post" action="/team/keys" class="grid-form">
+      <label>Purpose
+        <select name="key_type" required>
+          {% for key_type in key_types %}
+            <option value="{{ key_type }}">{{ key_type }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Employee email <input type="email" name="employee_email" required placeholder="ivan.petrov@example.com"></label>
+      <label>Duration <input name="duration" placeholder="30d, 12h, empty for no expiry"></label>
+      <div class="model-picker inherited-access">
+        <strong>Inherited access</strong>
+        {% if available_models %}
+          <ul class="access-list">
+            {% for model in available_models %}
+              <li>{{ model }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="muted">No access groups were returned by LiteLLM for this team.</p>
+        {% endif %}
+      </div>
+      <button type="submit">Create key</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Managed keys</h2>
+    {% if keys %}
+      <div class="table keys">
+        <div class="row head">
+          <span>Employee</span><span>Key</span><span>Status</span><span>Purpose</span><span>Actions</span>
+        </div>
+        {% for key in keys %}
+          <div class="row">
+            <span><strong>{{ key.owner_name }}</strong><small>{{ key.owner_email }}</small></span>
+            <span><code>{{ key.masked_key }}</code><small>{{ key.key_alias }}</small></span>
+            <span><span class="badge {{ key.status.value }}">{{ key.status.value }}</span></span>
+            <span>{{ key.key_type }}</span>
+            <span class="actions">
+              {% if key.status.value != "deleted" %}
+                <form method="post" action="/team/keys/{{ key.id }}/delete"><button type="submit" class="danger">Delete</button></form>
+              {% endif %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">No keys created through this service yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h2>LiteLLM team keys</h2>
+    {% if remote_keys %}
+      <div class="table remote">
+        <div class="row head">
+          <span>Alias</span><span>Key</span><span>Access groups</span><span>Spend</span>
+        </div>
+        {% for key in remote_keys %}
+          <div class="row">
+            <span><strong>{{ key.key_alias or key.key_name or "none" }}</strong><small>{{ key.user_id or "no user" }}</small></span>
+            <span><code>{{ key.key or "masked" }}</code></span>
+            <span>{{ ", ".join(key.models or []) }}</span>
+            <span>{{ key.spend or 0 }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">LiteLLM did not return existing team keys, or none exist yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

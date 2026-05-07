@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Admin · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Admin</p>
+      <h1>Teams and lead api-keys</h1>
+    </div>
+  </section>
+
+  {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+
+  <section class="panel">
+    <h2>Link existing LiteLLM team</h2>
+    <form method="post" action="/admin/teams/link" class="grid-form">
+      <label>LiteLLM team_id <input name="litellm_team_id" required placeholder="existing-team-id"></label>
+      <button type="submit">Link team</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Teams</h2>
+    {% if teams %}
+      <div class="table">
+        <div class="row head">
+          <span>Team</span><span>Access groups from LiteLLM</span><span>Lead api-key</span>
+        </div>
+        {% for team in teams %}
+          <div class="row">
+            <span><strong>{{ team.name }}</strong><small>{{ team.slug }} · {{ team.litellm_team_id }}</small></span>
+            <span>{{ ", ".join(team.models) }}</span>
+            <span>
+              <form method="post" action="/admin/teams/{{ team.id }}/lead-keys" class="inline-form">
+                <input type="email" name="lead_email" required placeholder="lead@example.com">
+                <button type="submit">Generate</button>
+              </form>
+              {% if team.lead_api_keys %}
+                <small>{{ team.lead_api_keys|length }} issued</small>
+                <div class="lead-key-list">
+                  {% for lead_key in team.lead_api_keys %}
+                    <form method="post" action="/admin/lead-keys/{{ lead_key.id }}/regenerate" class="inline-form compact">
+                      <code>{{ lead_key.masked_key }}</code>
+                      <span>{{ lead_key.lead_email }}</span>
+                      <button type="submit">Regenerate</button>
+                    </form>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">No teams yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

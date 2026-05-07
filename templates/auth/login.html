@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Login · LiteLLM Keys{% endblock %}
+{% block content %}
+  <section class="auth-panel">
+    <h1>Sign in</h1>
+    <p class="muted">Use the admin bootstrap account or your team-lead invite account.</p>
+    {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+    <form method="post" action="/login" class="stack">
+      <label>Email <input type="email" name="email" required autocomplete="email"></label>
+      <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
+      <button type="submit">Sign in</button>
+    </form>
+  </section>
+{% endblock %}
+
