@@ -80,6 +80,7 @@ def test_ensure_user_creates_missing_user_with_team_and_models():
             assert payload["teams"] == ["existing-team-123"]
             assert payload["models"] == ["coding-models"]
             assert payload["send_invite_email"] is False
+            assert payload["auto_create_key"] is False
             return httpx.Response(200, json={"user_id": payload["user_id"], "user_email": payload["user_email"]})
         return httpx.Response(404, json={"error": "missing"})
 

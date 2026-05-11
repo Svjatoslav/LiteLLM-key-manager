@@ -159,6 +159,8 @@ class LiteLLMClient:
             "models": models,
             "user_role": "internal_user",
             "send_invite_email": False,
+            # Team leads create the actual employee key in a separate call.
+            "auto_create_key": False,
         }
         data = self._request("POST", "/user/new", json=payload)
         resolved_user_id = data.get("user_id") or user_id
